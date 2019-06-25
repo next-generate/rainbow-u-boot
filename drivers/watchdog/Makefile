@@ -15,3 +15,5 @@ obj-$(CONFIG_XILINX_TB_WATCHDOG) += xilinx_tb_wdt.o
 obj-$(CONFIG_BFIN_WATCHDOG)  += bfin_wdt.o
 obj-$(CONFIG_OMAP_WATCHDOG) += omap_wdt.o
 obj-$(CONFIG_DESIGNWARE_WATCHDOG) += designware_wdt.o
+obj-$(CONFIG_DESIGNWARE_WATCHDOG) += designware_wdt.o
+obj-$(CONFIG_NUC970_WATCHDOG) += nuc970_wdt.o

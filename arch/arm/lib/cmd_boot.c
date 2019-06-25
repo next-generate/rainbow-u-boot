@@ -21,6 +21,8 @@
 #include <common.h>
 #include <command.h>
 
+extern int NUC970_cleanup(void);
+
 DECLARE_GLOBAL_DATA_PTR;
 
 /*
@@ -40,5 +42,8 @@ unsigned long do_go_exec(ulong (*entry)(int, char * const []),
 	ulong addr = (ulong)entry | 1;
 	entry = (void *)addr;
 
+	NUC970_cleanup();
+
 	return entry(argc, argv);
 }
+

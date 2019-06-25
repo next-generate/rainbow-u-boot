@@ -276,6 +276,10 @@ struct mtd_info {
 	struct udevice *dev;
 #endif
 	int usecount;
+#ifdef CONFIG_CMD_NAND_YAFFS2
+	u_char rw_oob;
+	u_char skipfirstblk;
+#endif
 };
 
 static inline int mtd_oobavail(struct mtd_info *mtd, struct mtd_oob_ops *ops)

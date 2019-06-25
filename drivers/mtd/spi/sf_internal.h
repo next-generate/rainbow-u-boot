@@ -72,6 +72,9 @@ enum spi_nor_option_flags {
 # define CMD_EXTNADDR_RDEAR		0xC8
 #endif
 
+#define CMD_RESET_ENABLE 	0x66
+#define CMD_RESET_MEMORY 	0x99
+
 /* Common status */
 #define STATUS_WIP			BIT(0)
 #define STATUS_QEB_WINSPAN		BIT(1)

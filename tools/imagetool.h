@@ -44,6 +44,7 @@ struct image_tool_params {
 	int eflag;
 	int fflag;
 	int iflag;
+	int kflag;
 	int lflag;
 	int pflag;
 	int vflag;
@@ -52,6 +53,8 @@ struct image_tool_params {
 	int os;
 	int arch;
 	int type;
+	int encrypt;
+	int checksum;
 	int comp;
 	char *dtc;
 	unsigned int addr;
@@ -76,6 +79,7 @@ struct image_tool_params {
 	bool external_data;	/* Store data outside the FIT */
 	bool quiet;		/* Don't output text in normal operation */
 	unsigned int external_offset;	/* Add padding to external data */
+	char *keyfile;
 };
 
 /*

@@ -17,6 +17,7 @@
 #include <command.h>
 #include <asm/system.h>
 
+extern int NUC970_cleanup(void);
 static void cache_flush(void);
 
 int cleanup_before_linux (void)
@@ -27,6 +28,8 @@ int cleanup_before_linux (void)
 	 *
 	 * we turn off caches etc ...
 	 */
+
+	NUC970_cleanup();
 
 	disable_interrupts ();
 

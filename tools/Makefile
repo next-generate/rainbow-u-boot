@@ -93,6 +93,7 @@ dumpimage-mkimage-objs := aisimage.o \
 			vybridimage.o \
 			$(ROCKCHIP_OBS) \
 			socfpgaimage.o \
+			aes_fips197.o \
 			lib/sha1.o \
 			lib/sha256.o \
 			common/hash.o \

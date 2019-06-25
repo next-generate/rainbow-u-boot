@@ -355,8 +355,11 @@ int bootm_decomp_image(int comp, ulong load, ulong image_start, int type,
 	case IH_COMP_NONE:
 		if (load == image_start)
 			break;
-		if (image_len <= unc_len)
+		if (image_len <= unc_len) {
+			/* CWWeng 2017.2.6 : why need memove ? 
 			memmove_wd(load_buf, image_buf, image_len, CHUNKSZ);
+			*/
+		}
 		else
 			ret = 1;
 		break;

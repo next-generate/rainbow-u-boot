@@ -2526,14 +2526,47 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 	struct mtd_oob_ops ops;
 	int ret;
 
+#ifdef CONFIG_CMD_NAND_YAFFS2
+	int oldopsmode = 0;
+	if(mtd->rw_oob==1) {
+		size_t oobsize = mtd->oobsize;
+		size_t datasize = mtd->writesize;
+		int i = 0;
+		uint8_t oobtemp[oobsize];
+		int datapages = 0;
+
+		datapages = len/(datasize);
+		for(i=0;i<(datapages);i++) {
+			memcpy((void *)oobtemp,
+			(void *)(buf+datasize*(i+1)),oobsize);
+			memmove((void *)(buf+datasize*(i+1)),(void *)(buf+datasize*(i+1)+oobsize),(datapages-(i+1))*(datasize)+(datapages-1)*oobsize);
+		}
+	}
+#endif
 	nand_get_device(mtd, FL_WRITING);
 	memset(&ops, 0, sizeof(ops));
 	ops.len = len;
 	ops.datbuf = (uint8_t *)buf;
+#ifdef CONFIG_CMD_NAND_YAFFS2
+	if(mtd->rw_oob!=1) {
+		ops.oobbuf = NULL;
+	} else {
+		ops.oobbuf = (uint8_t *)(buf+len);
+		ops.ooblen = mtd->oobsize;
+		oldopsmode = ops.mode;
+		ops.mode = MTD_OOB_RAW;
+	}
+#else
+	ops.oobbuf = NULL;
 	ops.mode = MTD_OPS_PLACE_OOB;
+#endif
 	ret = nand_do_write_ops(mtd, to, &ops);
 	*retlen = ops.retlen;
 	nand_release_device(mtd);
+
+#ifdef CONFIG_CMD_NAND_YAFFS2
+	ops.mode = oldopsmode;
+#endif
 	return ret;
 }
 

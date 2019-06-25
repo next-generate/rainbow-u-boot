@@ -58,6 +58,8 @@ obj-$(CONFIG_VIDEO_VESA) += vesa.o
 obj-$(CONFIG_FORMIKE) += formike.o
 obj-$(CONFIG_LG4573) += lg4573.o
 obj-$(CONFIG_AM335X_LCD) += am335x-fb.o
+obj-$(CONFIG_NUC970_LCD) += nuc970_fb.o
+obj-$(CONFIG_NUC977_LCD) += nuc970_fb.o
 
 obj-${CONFIG_VIDEO_TEGRA124} += tegra124/
 obj-${CONFIG_EXYNOS_FB} += exynos/

@@ -30,8 +30,13 @@ static int spi_flash_read_write(struct spi_slave *spi,
 		debug("SF: Failed to send command (%zu bytes): %d\n",
 		      cmd_len, ret);
 	} else if (data_len != 0) {
-		ret = spi_xfer(spi, data_len * 8, data_out, data_in,
+		if ((cmd[0] == 0x6b/*CMD_READ_QUAD_OUTPUT_FAST*/) || (cmd[0] == 0x32/*CMD_QUAD_PAGE_PROGRAM*/)) {
+			ret = spi_xfer(spi, data_len * 8, data_out, data_in,
+					SPI_6WIRE | SPI_XFER_END);
+		} else {
+			ret = spi_xfer(spi, data_len * 8, data_out, data_in,
 					SPI_XFER_END);
+		}
 		if (ret)
 			debug("SF: Failed to transfer %zu bytes of data: %d\n",
 			      data_len, ret);

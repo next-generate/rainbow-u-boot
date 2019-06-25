@@ -11,6 +11,9 @@
 #include "mkimage.h"
 #include <image.h>
 #include <version.h>
+#include <aes_fips197.h> /* CWWeng 2014/4/25 */
+
+u8 otp_key[32];
 
 static void copy_file(int, const char *, int);
 
@@ -19,7 +22,8 @@ static struct image_tool_params params = {
 	.os = IH_OS_LINUX,
 	.arch = IH_ARCH_PPC,
 	.type = IH_TYPE_KERNEL,
-	.comp = IH_COMP_GZIP,
+	.comp = IH_COMP_NONE, /* CWWeng 2014/5/12 : change IH_COMP_GZIP to IH_COMP_NONE */
+	.encrypt = IH_ENCRPT_NONE, /* CWWeng 2014/4/25 */
 	.dtc = MKIMAGE_DEFAULT_DTC_OPTIONS,
 	.imagename = "",
 	.imagename2 = "",
@@ -85,6 +89,9 @@ static void usage(const char *msg)
 		"          -e ==> set entry point to 'ep' (hex)\n"
 		"          -n ==> set image name to 'name'\n"
 		"          -d ==> use image data from 'datafile'\n"
+		"          -G ==> set encryption to 'encrypt'\n"
+		"          -H ==> use key file from 'keyfile'\n"
+		"          -S ==> set checksum calculation to 'checksum'\n"
 		"          -x ==> set XIP (execute in place)\n",
 		params.cmdname);
 	fprintf(stderr,
@@ -142,7 +149,7 @@ static void process_args(int argc, char **argv)
 	int opt;
 
 	while ((opt = getopt(argc, argv,
-			     "a:A:b:c:C:d:D:e:Ef:Fk:i:K:ln:p:O:rR:qsT:vVx")) != -1) {
+			     "a:A:b:c:C:d:D:e:Ef:G:H:Fk:i:K:ln:p:O:rR:S:qsT:vVx")) != -1) {
 		switch (opt) {
 		case 'a':
 			params.addr = strtoull(optarg, &ptr, 16);
@@ -208,6 +215,14 @@ static void process_args(int argc, char **argv)
 			params.type = IH_TYPE_FLATDT;
 			params.fflag = 1;
 			break;
+		case 'G': /* CWWeng 2014/4/29 add */
+			if ((params.encrypt = genimg_get_encrypt_id (optarg)) < 0) 
+				usage ("Invalid encryption type");
+			break;
+		case 'H': /* CWWeng 2015/2/6 add */
+			params.keyfile = optarg;
+			params.kflag = 1;
+			break;
 		case 'i':
 			params.fit_ramdisk = optarg;
 			break;
@@ -250,6 +265,10 @@ static void process_args(int argc, char **argv)
 			 * file, if only one is not enough.
 			 */
 			params.imagename2 = optarg;
+			break;
+		case 'S': /* CWWeng 2015/3/5 add */
+			if ((params.checksum = genimg_get_checksum_id (optarg)) < 0)
+				usage ("Invalid checksum type");
 			break;
 		case 's':
 			params.skipcpy = 1;
@@ -299,8 +318,60 @@ static void process_args(int argc, char **argv)
 		usage("Missing output filename");
 }
 
+static void my_atoi(u8 *dest, char src)
+{
+        if ((src >= '0') && (src <= '9'))
+                *dest = src - '0';
+        else if ((src >= 'a') && (src <= 'f'))
+                *dest = 0xa + src - 'a';
+        else if ((src >= 'A') && (src <= 'F'))
+                *dest = 0xA + src - 'A';
+}
+
+static void _read_key(char *cmdname, char *keyfile)
+{
+	int kfd = -1; 
+	char buf[8][11];
+	char buf2[8][8];
+	u8 buf3[8][8];
+	u8 buf4[8][4];
+	int line,n;
+
+        kfd = open (keyfile, O_RDONLY);
+        if (kfd < 0) {
+        	fprintf (stderr, "%s: Can't open %s: %s\n",
+                                cmdname, keyfile,
+                                strerror(errno));
+                exit (EXIT_FAILURE);
+        }
+
+	/* Parsing key */
+        for (line = 0; line < 8; line++)
+                read(kfd, buf[line], 11);
+
+        /* Trim off 0x and '\0' */
+        for (line = 0; line < 8; line++)
+                memcpy(buf2[line], buf[line] + 2, 8);
+
+        /* Translate char to integer */
+        for (line = 0; line < 8; line++)
+                for (n = 0; n < 8; n++)
+                        my_atoi(&buf3[line][n],buf2[line][n]);
+
+        /* Merge every two digits to an integer */
+        for (line = 0; line < 8; line++)
+                for (n = 0; n < 8; n+=2)
+                        buf4[line][n/2] = (buf3[line][n]*16) + buf3[line][n+1];
+
+	/* copy to otp_key[32] */
+	memcpy(otp_key, buf4, 32);
+}
+
 int main(int argc, char **argv)
 {
+	long imagelen; /* CWWeng 2014/4/30 */
+	int aes_blockno; /* CWWeng 2014/4/30 */
+	aes_context ctx; /* CWWeng 2014/5/12 add */
 	int ifd = -1;
 	struct stat sbuf;
 	char *ptr;
@@ -352,6 +423,10 @@ int main(int argc, char **argv)
 			exit (retval);
 	}
 
+	/* CWWeng 2015/2/6 add to read key file */
+	if (params.kflag) 
+		_read_key(params.cmdname, params.keyfile);
+
 	if (params.lflag || params.fflag) {
 		ifd = open (params.imagefile, O_RDONLY|O_BINARY);
 	} else {
@@ -384,6 +459,18 @@ int main(int argc, char **argv)
 			exit (EXIT_FAILURE);
 		}
 
+		/* CWWeng 2014/5/28 : append 0 to the end of image 
+		 * aes_encrypt() encrypt one 128 bit block
+		 * if the image is not multiple of 16 byte (128 bit),
+		 * patch 0 to the end of the image
+		 */
+		if (params.encrypt == IH_ENCRPT_AES) {
+			char ch[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+			lseek(ifd,0,SEEK_END);
+			if (sbuf.st_size % 16)
+				write(ifd,ch, 16 - (sbuf.st_size % 16));
+		}
+
 		ptr = mmap(0, sbuf.st_size, PROT_READ, MAP_SHARED, ifd, 0);
 		if (ptr == MAP_FAILED) {
 			fprintf (stderr, "%s: Can't read %s: %s\n",
@@ -400,6 +487,40 @@ int main(int argc, char **argv)
 		 */
 		retval = imagetool_verify_print_header(ptr, &sbuf,
 				tparams, &params);
+
+		/*
+		 * CWWeng 2014/4/30 : encrypt the image
+		 * aes_encrypt() encrypt one 128 bit block
+		 * if the image is not multiple of 16 byte (128 bit),
+		 * patch 0 to the end of the image
+		 */
+		if (params.encrypt == IH_ENCRPT_AES) {
+			int i;
+			u8 temp_key;
+			for (i=0; i<32; i+=4)
+			{
+				temp_key = otp_key[i];
+				otp_key[i] = otp_key[i+3];
+				otp_key[i+3] = temp_key;
+				
+				temp_key = otp_key[i+1];
+				otp_key[i+1] = otp_key[i+2];
+				otp_key[i+2] = temp_key;
+			}
+
+			for (i=0; i<32; i+=4)
+				printf("Key%d = 0x%02x%02x%02x%02x\n",i/4,otp_key[i],otp_key[i+1],otp_key[i+2],otp_key[i+3]);
+
+			aes_set_key(&ctx, (u8 *)otp_key, 256);
+			imagelen = sbuf.st_size + 64;
+			aes_blockno = 0;
+			do
+			{
+				aes_encrypt(&ctx, (u8 *)(ptr+(16*aes_blockno)), (u8 *)(ptr+(16*aes_blockno)));
+				imagelen -= 16;
+				aes_blockno++;
+			} while (imagelen > 0);
+		}
 
 		(void) munmap((void *)ptr, sbuf.st_size);
 		(void) close (ifd);
@@ -528,6 +649,18 @@ int main(int argc, char **argv)
 	}
 	params.file_size = sbuf.st_size;
 
+	/* CWWeng 2014/5/28 : append 0 to the end of image
+	 * aes_encrypt() encrypt one 128 bit block
+	 * if the image is not multiple of 16 byte (128 bit),
+	 * patch 0 to the end of the image
+	 */
+	if (params.encrypt == IH_ENCRPT_AES) {
+		char ch[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		lseek(ifd,0,SEEK_END);
+		if (sbuf.st_size % 16)
+			write(ifd,ch, 16 - (sbuf.st_size % 16));
+	}
+
 	ptr = mmap(0, sbuf.st_size, PROT_READ|PROT_WRITE, MAP_SHARED, ifd, 0);
 	if (ptr == MAP_FAILED) {
 		fprintf (stderr, "%s: Can't map %s: %s\n",
@@ -551,6 +684,40 @@ int main(int argc, char **argv)
 		fprintf (stderr, "%s: Can't print header for %s: %s\n",
 			params.cmdname, tparams->name, strerror(errno));
 		exit (EXIT_FAILURE);
+	}
+
+	/*
+	 * CWWeng 2014/4/30 : encrypt the image
+	 * aes_encrypt() encrypt one 128 bit block
+	 * if the image is not multiple of 16 byte (128 bit),
+	 * patch 0 to the end of the image
+	 */
+	if (params.encrypt == IH_ENCRPT_AES) {
+		int i;
+		u8 temp_key;
+		for (i=0; i<32; i+=4)
+		{
+			temp_key = otp_key[i];
+			otp_key[i] = otp_key[i+3];
+			otp_key[i+3] = temp_key;
+				
+			temp_key = otp_key[i+1];
+			otp_key[i+1] = otp_key[i+2];
+			otp_key[i+2] = temp_key;
+		}
+
+		for (i=0; i<32; i+=4)
+			printf("Key%d = 0x%02x%02x%02x%02x\n",i/4,otp_key[i],otp_key[i+1],otp_key[i+2],otp_key[i+3]);
+
+		aes_set_key(&ctx, (u8 *)otp_key, 256);
+		imagelen = sbuf.st_size + 64;
+		aes_blockno = 0;
+		do
+		{
+			aes_encrypt(&ctx, (u8 *)(ptr+(16*aes_blockno)), (u8 *)(ptr+(16*aes_blockno)));
+			imagelen -= 16;
+			aes_blockno++;
+		} while (imagelen > 0);
 	}
 
 	(void) munmap((void *)ptr, sbuf.st_size);

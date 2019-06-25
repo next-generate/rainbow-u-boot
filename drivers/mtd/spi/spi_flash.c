@@ -22,6 +22,8 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+int spi_flash_reset(void);
+
 static void spi_flash_addr(u32 addr, u8 *cmd)
 {
 	/* cmd[0] is actual command */
@@ -1174,7 +1176,8 @@ int spi_flash_scan(struct spi_flash *flash)
 	flash->read_cmd = CMD_READ_ARRAY_FAST;
 	if (spi->mode & SPI_RX_SLOW)
 		flash->read_cmd = CMD_READ_ARRAY_SLOW;
-	else if (spi->mode & SPI_RX_QUAD && params->flags & RD_QUAD)
+	//else if (spi->mode & SPI_RX_QUAD && params->flags & RD_QUAD) //CWWeng 2017.2.10
+	else if (params->flags & RD_QUAD) //CWWeng 2017.2.10
 		flash->read_cmd = CMD_READ_QUAD_OUTPUT_FAST;
 	else if (spi->mode & SPI_RX_DUAL && params->flags & RD_DUAL)
 		flash->read_cmd = CMD_READ_DUAL_OUTPUT_FAST;
@@ -1258,3 +1261,41 @@ int spi_flash_scan(struct spi_flash *flash)
 
 	return ret;
 }
+
+int spi_flash_reset(void)
+{
+	struct spi_flash *flash;
+	int ret;
+	struct spi_slave *spi;
+
+	/*
+	 * Load U-Boot image from SPI flash into RAM
+	 */
+
+	flash = spi_flash_probe(0, 0, 1000000, 3); //SPI_MODE_3
+	if (!flash) {
+		puts("SPI probe failed.\n");
+		hang();
+	}
+
+	spi = flash->spi;
+
+	spi_claim_bus(spi);
+
+	ret = spi_flash_cmd(spi, CMD_RESET_ENABLE, NULL, 0);
+	if (ret) {
+		printf("SF: Failed issue reset command (CMD_RESET_ENABLE)\n");
+	}
+
+	ret = spi_flash_cmd(spi, CMD_RESET_MEMORY, NULL, 0);
+	if (ret) {
+		printf("SF: Failed issue reset command (CMD_RESET_MEMORY)\n");
+	}
+
+	spi_release_bus(spi);
+
+	printf("SF: Device software reset\n");
+	
+	return NULL;
+}
+
