@@ -6,6 +6,7 @@
 #include <common.h>
 #include <asm/io.h>
 #include <asm/gpio.h>
+#include <watchdog.h>
 
 #define REG_HCLKEN      0xB0000210
 #define REG_PCLKEN0     0xB0000218
@@ -109,7 +110,11 @@ int board_eth_init(bd_t *bis)
     writel(readl(REG_HCLKEN) | 0x10000, REG_HCLKEN);   // EMAC0 clk
     writel(readl(REG_CLKDIVCTL8) | 0x10, REG_CLKDIVCTL8); //MII management interface clock
     //Init multi-function pin for RMII
+#ifdef CONFIG_NUC970_EMAC0_NO_MDC
+    writel(0x11111100, REG_MFP_GPF_L);	// pin F2~F7 for RMII0, F0~F1 stay GPIO
+#else
     writel(0x11111111, REG_MFP_GPF_L);	// pin F0~F7 for RMII0
+#endif /* CONFIG_NUC970_EMAC0_NO_MDC */
     writel((readl(REG_MFP_GPF_H) & ~0xff) | 0x11, REG_MFP_GPF_H);// pin F8~F9 for RMII0
 #else //CONFIG_NUC970_EMAC1
     writel(readl(REG_HCLKEN) | 0x20000, REG_HCLKEN);   // EMAC1 clk
@@ -168,7 +173,7 @@ int board_mmc_init(bd_t *bd)
 
 #ifdef CONFIG_NUC970_EMMC
 #ifdef CONFIG_NAND_NUC970
-# error Don't enable eMMC(CONFIG_NUC970_EMMC) and NAND(CONFIG_NAND_NUC970) at the same time!
+# error Do not enable eMMC(CONFIG_NUC970_EMMC) and NAND(CONFIG_NAND_NUC970) at the same time!
 #endif
 
     writel(readl(REG_HCLKEN) | 0x00700000, REG_HCLKEN);   // eMMC & NAND & FMI clk
@@ -264,7 +269,45 @@ int NUC970_cleanup(void)
 
 int checkboard(void)
 {
-	puts("Board: NUC970\n");
+        unsigned int id;
+
+        id = (readl(0xB0000004) & 0x0F000000) >> 24;
+
+        printf("Board: ");
+
+        switch(id) {
+                case 0:
+                        printf("N9H30F\n");
+                        break;
+                case 1:
+                        printf("NUC971\n");
+                        break;
+                case 2:
+                        printf("NUC972\n");
+                        break;
+                case 3:
+                        printf("NUC973\n");
+                        break;
+                case 8:
+                        printf("NUC978\n");
+                        break;
+                case 9:
+                        printf("N9H30K\n");
+                        break;
+                case 0xd:
+                        printf("NUC975\n");
+                        break;
+                case 0xe:
+                        printf("NUC976\n");
+                        break;
+                case 0xf:
+                        printf("NUC977\n");
+                        break;
+                default:
+                        printf("Unknown\n");
+                        break;
+
+        }
 
 	return 0;
 }

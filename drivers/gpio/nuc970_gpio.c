@@ -37,6 +37,8 @@ static const struct gpio_port port_class[] = {
 	 (volatile unsigned int *)REG_GPIOH_DATAIN},
 	{(volatile unsigned int *)REG_GPIOI_DIR, (volatile unsigned int *)REG_GPIOI_DATAOUT,
 	 (volatile unsigned int *)REG_GPIOI_DATAIN},
+	{(volatile unsigned int *)REG_GPIOJ_DIR, (volatile unsigned int *)REG_GPIOJ_DATAOUT,
+	 (volatile unsigned int *)REG_GPIOJ_DATAIN},
 	{},
 };
 
@@ -56,25 +58,15 @@ int gpio_set_value(unsigned gpio, int val)
 {
 	int port_num, value;
 	const struct gpio_port *port =
-	    nuc970_gpio_cla_port(gpio, &port_num);
+	nuc970_gpio_cla_port(gpio, &port_num);
 
-	if ((readl(port->dir) & (1 << port_num))) {	//GPIO OUT
-		value = readl(port->out);
-		if (val)
-			value |= (1 << port_num);
-		else
-			value &= ~(1 << port_num);
-		writel(value, port->out);
 
-	} else {		//GPIO IN
-		value = readl(port->in);
-		if (val)
-			value |= (1 << port_num);
-		else
-			value &= ~(1 << port_num);
-		writel(value, port->in);;
-	}
-
+	value = readl(port->out);
+	if (val)
+		value |= (1 << port_num);
+	else
+		value &= ~(1 << port_num);
+	writel(value, port->out);
 
 	return 0;
 }
@@ -94,7 +86,6 @@ int gpio_get_value(unsigned gpio)
 
 	} else {		//GPIO IN
 		value = (readl(port->in) >> port_num) & 0x1;
-		writel(value, port->in);
 	}
 
 	return value;

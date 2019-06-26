@@ -26,14 +26,12 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define CONFIG_NUC970
+#define EXT_CLK	        12000000        /* 12 MHz crystal */
 
 #define CONFIG_SYS_TEXT_BASE		0xE00000
 
 #define CONFIG_SYS_LOAD_ADDR            0x8000
-#define CONFIG_EXT_CLK	                12000000        /* 12 MHz crystal */
-#define CONFIG_TMR_DIV                  120             /* timer prescaler */  
-#define CONFIG_SYS_HZ			1000
+
 #define CONFIG_SYS_MEMTEST_START         0xA00000
 #define CONFIG_SYS_MEMTEST_END           0xB00000
 
@@ -44,13 +42,10 @@
 #define CONFIG_SETUP_MEMORY_TAGS 1
 #define CONFIG_INITRD_TAG	1
 
-#define CONFIG_CMD_TIMER
-
 /*#define CONFIG_NUC970_HW_CHECKSUM */
 
-#define CONFIG_SYS_USE_SPIFLASH 
+/*#define CONFIG_SYS_USE_SPIFLASH */
 #define CONFIG_SYS_USE_NANDFLASH  
-#define CONFIG_SYS_NO_FLASH    // that is, no *NOR* flash 
 #define CONFIG_ENV_IS_IN_NAND 
 /*#define CONFIG_ENV_IS_IN_SPI_FLASH */
 /*#define CONFIG_ENV_IS_IN_MMC */
@@ -58,15 +53,11 @@
 #define CONFIG_BOARD_EARLY_INIT_F
 #define CONFIG_BOARD_LATE_INIT
 
-
-#define CONFIG_NUC970_WATCHDOG
 #define CONFIG_HW_WATCHDOG
 
 #define CONFIG_SYS_BOOTM_LEN		0x1000000 /* 16MB max kernel size */
 
-/*#define CONFIG_DISPLAY_CPUINFO */
-
-#define CONFIG_BOOTDELAY	3
+/*#define CONFIG_BOOTDELAY	3*/
 
 #define CONFIG_SYS_SDRAM_BASE   0
 #define CONFIG_NR_DRAM_BANKS    2     /* there are 2 sdram banks for nuc970 */
@@ -75,16 +66,10 @@
 #define CONFIG_BAUDRATE         115200
 #define CONFIG_SYS_BAUDRATE_TABLE       {115200, 57600, 38400}
 
-
-#define CONFIG_NUC970_EMAC0
 /*#define CONFIG_NUC970_EMAC1*/
 /*#define CONFIG_CMD_NET */
-#define CONFIG_NUC970_ETH
-#define CONFIG_NUC970_PHY_ADDR          1
 #define CONFIG_ETHADDR                  00:00:00:11:66:88
 #define CONFIG_SYS_RX_ETH_BUFFER        16 // default is 4, set to 16 here.
-
-#define CONFIG_NUC970_CONSOLE
 
 /*#define CONFIG_KPI_NUC970*/
 
@@ -114,11 +99,6 @@
 #undef CONFIG_CMD_SOURCE
 #endif
 
-#define CONFIG_CMD_PING		1
-#define CONFIG_CMD_DHCP		1
-#define CONFIG_CMD_JFFS2        1
-
-
 #ifdef CONFIG_SYS_USE_SPIFLASH
 #undef CONFIG_CMD_IMLS  /*====================> SPI only */
 #undef CONFIG_CMD_JFFS2
@@ -133,7 +113,6 @@
 #endif
 
 #ifdef CONFIG_SYS_USE_NANDFLASH
-#define CONFIG_NAND_NUC970
 #define CONFIG_CMD_NAND		1
 #define CONFIG_CMD_UBI         1 
 #define CONFIG_CMD_UBIFS       1 
@@ -144,6 +123,7 @@
 #define CONFIG_MTD_PARTITIONS  1 
 #define CONFIG_RBTREE          1 
 #define CONFIG_LZO             1 
+#define CONFIG_SYS_NAND_ONFI_DETECTION 1
 
 #define MTDIDS_DEFAULT "nand0=nand0"
 #define MTDPARTS_DEFAULT "mtdparts=nand0:0x200000@0x0(u-boot),0x1400000@0x200000(kernel),-(user)"
@@ -183,42 +163,12 @@
 
 #define CONFIG_SYS_NAND_U_BOOT_SIZE     (500 * 1024)    /* Size of RAM U-Boot image   */
 
-
-/* NAND chip page size          */
-#define CONFIG_SYS_NAND_PAGE_SIZE       2048
-/* NAND chip block size         */
-#define CONFIG_SYS_NAND_BLOCK_SIZE      (128 * 1024)
-/* NAND chip page per block count  */
-#define CONFIG_SYS_NAND_PAGE_COUNT      64
-/* Location of the bad-block label */
-#define CONFIG_SYS_NAND_BAD_BLOCK_POS   0
-/* Size of the block protected by one OOB (Spare Area in Samsung terminology) */
-#define CONFIG_SYS_NAND_ECCSIZE CONFIG_SYS_NAND_PAGE_SIZE
-/* Number of ECC-blocks per NAND page */
-#define CONFIG_SYS_NAND_ECCSTEPS        (CONFIG_SYS_NAND_PAGE_SIZE / CONFIG_SYS_NAND_ECCSIZE)
-/* Size of a single OOB region */
-#define CONFIG_SYS_NAND_OOBSIZE 64
-/* Number of ECC bytes per page */
-#define CONFIG_SYS_NAND_ECCTOTAL        (CONFIG_SYS_NAND_ECCBYTES * CONFIG_SYS_NAND_ECCSTEPS)
-/* ECC byte positions */
-#define CONFIG_SYS_NAND_ECCPOS          {40, 41, 42, 43, 44, 45, 46, 47, \
-                                 48, 49, 50, 51, 52, 53, 54, 55, \
-                                 56, 57, 58, 59, 60, 61, 62, 63}
 #endif 
 
 
 /* SPI flash */
 #ifdef CONFIG_SYS_USE_SPIFLASH
-#define CONFIG_NUC970_SPI       1
-#define CONFIG_CMD_SPI          1
-#define CONFIG_CMD_SF           1
 #define CONFIG_SPI              1
-#define CONFIG_SPI_FLASH        1
-#define CONFIG_SPI_FLASH_MACRONIX   1
-#define CONFIG_SPI_FLASH_WINBOND   1 
-#define CONFIG_SPI_FLASH_EON 1 
-#define CONFIG_SPI_FLASH_USE_4K_SECTORS
-#define CONFIG_SPI_FLASH_BAR
 #ifdef CONFIG_ENV_IS_IN_SPI_FLASH
 #define CONFIG_ENV_OFFSET       0x80000
 #define CONFIG_ENV_SIZE         0x10000
@@ -235,41 +185,30 @@
 #define CONFIG_SYS_LONGHELP		1
 #define CONFIG_CMDLINE_EDITING		1
 #define CONFIG_AUTO_COMPLETE
-#define CONFIG_SYS_HUSH_PARSER
 #define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
 
-#ifdef CONFIG_KPI_NUC970
-/*#define CONFIG_KPI_PA_PORT   1 */   /* KPI select PA port */
-#define CONFIG_KPI_PH_PORT   1  /* KPI select PH port */
-#define CONFIG_KPI_ROW_NUM   3  /* row number is 1~4 */
-#define CONFIG_KPI_COL_NUM   3  /* col number is 1~8 */
-#define CONFIG_KPI_DEBOUNCE  8  /* debounce length setting: 0~13 */
-#endif
 
 /* Following block is for LCD support */
-#if 1
-#define CONFIG_LCD
-#define CONFIG_NUC970_LCD
+#ifdef CONFIG_LCD
 /*#define CONFIG_NUC977_LCD*/
 #define LCD_BPP                         LCD_COLOR16
 #define CONFIG_LCD_LOGO
 #define CONFIG_LCD_INFO
 #define CONFIG_LCD_INFO_BELOW_LOGO
-#define CONFIG_SYS_CONSOLE_IS_IN_ENV
-#define CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE
+/*#define CONFIG_SYS_CONSOLE_IS_IN_ENV*/
+/*#define CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE*/
 #define CONFIG_CONSOLE_SCROLL_LINES	1 
 #endif
 
 /* Following block is for MMC support */
-#if 1
-#define CONFIG_NUC970_MMC
+#ifdef CONFIG_NUC970_MMC
 #define CONFIG_CMD_MMC
 #define CONFIG_CMD_FAT
-#define CONFIG_MMC
-#define CONFIG_GENERIC_MMC
+/*#define CONFIG_MMC */
+/*#define CONFIG_GENERIC_MMC */
 #define CONFIG_DOS_PARTITION
 /*#define CONFIG_MMC_TRACE */
-#define CONFIG_NUC970_SD_PORT0 
+/*#define CONFIG_NUC970_SD_PORT0 */
 /*#define CONFIG_NUC970_SD_PORT1 */
 /*#define CONFIG_NUC970_EMMC */      /* Don't enable eMMC(CONFIG_NUC970_EMMC) and NAND(CONFIG_NAND_NUC970) at the same time! */
 #ifdef CONFIG_ENV_IS_IN_MMC
@@ -283,16 +222,15 @@
 
 /* Following block is for EHCI support*/
 #if 1
-#define CONFIG_CMD_USB
-#define CONFIG_CMD_FAT
-#define CONFIG_USB_STORAGE
-#define CONFIG_USB_EHCI
-#define CONFIG_USB_EHCI_NUC970
+/*#define CONFIG_CMD_USB*/
+/*#define CONFIG_CMD_FAT*/
+/*#define CONFIG_USB_STORAGE*/
+/*#define CONFIG_USB_EHCI*/
+/*#define CONFIG_USB_EHCI_NUC970*/
 #define CONFIG_EHCI_HCD_INIT_AFTER_RESET
 #define CONFIG_DOS_PARTITION
 #endif
 
-#define CONFIG_NUC970_GPIO
 
 /*#define CONFIG_OF_LIBFDT */
 /*#define CONFIG_FIT */

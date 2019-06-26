@@ -26,10 +26,14 @@
 
 void board_init_f(unsigned long bootflag);
 
+extern int nuc970_serial_init (void);
 extern int nuc970_nand_read_page_hwecc_oob_first(struct mtd_info *mtd, struct nand_chip *chip, uint8_t *buf, int oob_required, int page);
 extern void nuc970_nand_command_lp(struct mtd_info *mtd, unsigned int command, int column, int page_addr);
 extern unsigned char nuc970_nand_read_byte(struct mtd_info *mtd);
-//#define printf(fmt, arg...) sysprintf(fmt, ##arg) //CWWeng add
+extern int nand_register(int devnum, struct mtd_info *mtd);
+extern int board_nand_postinit(struct mtd_info *mtd);
+extern void sysprintf(char* pcStr,...);
+#define printf(fmt, arg...) sysprintf(fmt, ##arg) //CWWeng add
 
 //static int nand_ecc_pos[] = CONFIG_SYS_NAND_ECCPOS;
 
@@ -40,23 +44,12 @@ extern unsigned char nuc970_nand_read_byte(struct mtd_info *mtd);
 static struct nand_chip nand_chip[CONFIG_SYS_MAX_NAND_DEVICE];
 static ulong base_address[CONFIG_SYS_MAX_NAND_DEVICE] = CONFIG_SYS_NAND_BASE_LIST;
 
-#define ECCSTEPS	(CONFIG_SYS_NAND_PAGE_SIZE / \
-					CONFIG_SYS_NAND_ECCSIZE)
-#define ECCTOTAL	(ECCSTEPS * CONFIG_SYS_NAND_ECCBYTES)
-
 
 static int nand_is_bad_block(struct mtd_info *mtd, int block)
 {
-	//struct nand_chip *this = mtd->priv;
-	struct nand_chip *chip = mtd_to_nand(mtd);
+	int page_addr = 0 + block * (mtd->erasesize / mtd->writesize);
 
-	//nand_command(mtd, block, 0, CONFIG_SYS_NAND_BAD_BLOCK_POS, NAND_CMD_READOOB);
-	int page_addr = 0 + block * CONFIG_SYS_NAND_PAGE_COUNT;
-	
-	//chip->cmdfunc(mtd, NAND_CMD_READOOB, 0 , page_addr );
 	nuc970_nand_command_lp(mtd, NAND_CMD_READOOB, 0 , page_addr );
-
-	//if(chip->read_byte(mtd)!=0xff)
 	if(nuc970_nand_read_byte(mtd)!=0xff)
 		return 1;
 	return 0;
@@ -69,37 +62,38 @@ static int nand_read_page(struct mtd_info *mtd, int block, int page, uchar *dst)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	int real_page;
 
-	real_page = block * (CONFIG_SYS_NAND_BLOCK_SIZE / CONFIG_SYS_NAND_PAGE_SIZE) + page;
+	real_page = block * (mtd->erasesize / mtd->writesize) + page;
 
 	nuc970_nand_read_page_hwecc_oob_first(mtd, chip, dst, 0, real_page);
-/*
-	if (chip->ecc.read_page)
-		chip->ecc.read_page(mtd, chip, dst, 0, real_page); //CWWeng : it calls nuc970_nand_read_page_hwecc_oob_first
-*/
+	/*
+		if (chip->ecc.read_page)
+			chip->ecc.read_page(mtd, chip, dst, 0, real_page); //CWWeng : it calls nuc970_nand_read_page_hwecc_oob_first
+	*/
 	return 0;
 }
 
 static int nand_load(struct mtd_info *mtd, unsigned int offs,
-		     unsigned int uboot_size, uchar *dst)
+                     unsigned int uboot_size, uchar *dst)
 {
 	unsigned int block, lastblock;
 	unsigned int page;
+	unsigned int page_count = mtd->erasesize / mtd->writesize;
 
 	/*
 	 * offs has to be aligned to a page address!
 	 */
-	block = offs / CONFIG_SYS_NAND_BLOCK_SIZE;
-	lastblock = (offs + uboot_size - 1) / CONFIG_SYS_NAND_BLOCK_SIZE;
-	page = (offs % CONFIG_SYS_NAND_BLOCK_SIZE) / CONFIG_SYS_NAND_PAGE_SIZE;
+	block = offs / mtd->erasesize;
+	lastblock = (offs + uboot_size - 1) / mtd->erasesize;
+	page = (offs % mtd->erasesize) / mtd->writesize;
 
 	while (block <= lastblock) {
 		if (!nand_is_bad_block(mtd, block)) {
 			/*
 			 * Skip bad blocks
 			 */
-			while (page < CONFIG_SYS_NAND_PAGE_COUNT) {
+			while (page < page_count) {
 				nand_read_page(mtd, block, page, dst);
-				dst += CONFIG_SYS_NAND_PAGE_SIZE;
+				dst += mtd->writesize;
 				page++;
 			}
 
@@ -123,38 +117,41 @@ static int nand_load(struct mtd_info *mtd, unsigned int offs,
 void board_init_f(unsigned long bootflag)
 {
 	struct nand_chip *nand = &nand_chip[0];
-        struct mtd_info *mtd = nand_to_mtd(nand);
-        ulong base_addr = base_address[0];
-        int maxchips = CONFIG_SYS_NAND_MAX_CHIPS;
+	struct mtd_info *mtd = nand_to_mtd(nand);
+	ulong base_addr = base_address[0];
+	int maxchips = CONFIG_SYS_NAND_MAX_CHIPS;
 	__attribute__((noreturn)) void (*uboot)(void);
 
+	nuc970_serial_init();
+	printf("NAND boot!\n");
 
-        if (maxchips < 1)
-                maxchips = 1;
+	if (maxchips < 1)
+		maxchips = 1;
 
-        nand->IO_ADDR_R = nand->IO_ADDR_W = (void  __iomem *)base_addr;
+	nand->IO_ADDR_R = nand->IO_ADDR_W = (void  __iomem *)base_addr;
 
-        if (board_nand_init(nand))
-                return;
+	if (board_nand_init(nand))
+		return;
 
-        if (nand_scan(mtd, maxchips))
-                return;
+	nand_scan(mtd, maxchips); /* CWWeng : 2018/1/2 : not return */
 
-        nand_register(0, mtd);
-	
+	board_nand_postinit(mtd);
+
+	nand_register(0, mtd);
+
 	/*
 	 * Load U-Boot image from NAND into RAM
 	 */
 	nand_load(mtd, CONFIG_SYS_NAND_U_BOOT_OFFS, CONFIG_SYS_NAND_U_BOOT_SIZE,
-		  (uchar *)CONFIG_SYS_NAND_U_BOOT_DST);
+	          (uchar *)CONFIG_SYS_NAND_U_BOOT_DST);
 
 #ifdef CONFIG_NAND_ENV_DST
 	nand_load(mtd, CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE,
-		  (uchar *)CONFIG_NAND_ENV_DST);
+	          (uchar *)CONFIG_NAND_ENV_DST);
 
 #ifdef CONFIG_ENV_OFFSET_REDUND
 	nand_load(mtd, CONFIG_ENV_OFFSET_REDUND, CONFIG_ENV_SIZE,
-		  (uchar *)CONFIG_NAND_ENV_DST + CONFIG_ENV_SIZE);
+	          (uchar *)CONFIG_NAND_ENV_DST + CONFIG_ENV_SIZE);
 #endif
 #endif
 
@@ -177,6 +174,6 @@ void lowlevel_init(void) {}
  */
 void hang(void)
 {
-        /* Loop forever */
-        while (1) ;
+	/* Loop forever */
+	while (1) ;
 }

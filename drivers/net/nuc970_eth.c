@@ -30,8 +30,6 @@
 #include <linux/mii.h>
 #include "nuc970_eth.h"
 
-#define NON_CACHE_ADDR  0x80000000 
-
 
 struct eth_descriptor volatile rx_desc[RX_DESCRIPTOR_NUM] __attribute__ ((aligned(32)));
 struct eth_descriptor volatile tx_desc[TX_DESCRIPTOR_NUM] __attribute__ ((aligned(32)));
@@ -39,7 +37,14 @@ struct eth_descriptor volatile tx_desc[TX_DESCRIPTOR_NUM] __attribute__ ((aligne
 
 struct eth_descriptor volatile *tx_desc_ptr, *rx_desc_ptr;
 
-
+#ifdef CONFIG_NUC970_EMAC0_NO_MDC
+int nuc970_reset_phy(void)
+{
+	/* Just set EMAC to 100Mb Full-duplex */
+	writel(readl(MCMDR) | MCMDR_OPMOD | MCMDR_FDUP, MCMDR);
+	return(0);
+}
+#else /* CONFIG_NUC970_EMAC0_NO_MDC */
 int nuc970_eth_mii_write(uchar addr, uchar reg, ushort val)
 {
 
@@ -119,20 +124,20 @@ int nuc970_reset_phy(void)
 
         return(0);
 }
-
+#endif /* CONFIG_NUC970_EMAC0_NO_MDC */
 
 void init_tx_desc(void)
 {
         int i;
         
-        writel((unsigned int)(&tx_desc[0]) | NON_CACHE_ADDR, TXDLSA);
-        tx_desc_ptr = (unsigned int)(&tx_desc[0]) | NON_CACHE_ADDR;
+        writel((unsigned int)(&tx_desc[0]), TXDLSA);
+        tx_desc_ptr = &tx_desc[0];
         
         for(i = 0; i < TX_DESCRIPTOR_NUM; i++) {
                 tx_desc[i].status1 = PaddingMode | CRCMode/* | MACTxIntEn*/;
                 tx_desc[i].buf = NULL;
                 tx_desc[i].status2 = 0;
-                tx_desc[i].next = (unsigned int) &tx_desc[(i + 1) % TX_DESCRIPTOR_NUM] | NON_CACHE_ADDR;                                
+                tx_desc[i].next = (struct eth_descriptor *)(&tx_desc[(i + 1) % TX_DESCRIPTOR_NUM]);                                
         }
         
         return;
@@ -142,14 +147,14 @@ void init_rx_desc(void)
 {
         int i;
         
-        writel((unsigned int)&rx_desc[0] | NON_CACHE_ADDR, RXDLSA);
-        rx_desc_ptr = (unsigned int)&rx_desc[0] | NON_CACHE_ADDR;
+        writel((unsigned int)&rx_desc[0], RXDLSA);
+        rx_desc_ptr = &rx_desc[0];
         
         for(i = 0; i < RX_DESCRIPTOR_NUM; i++) {
                 rx_desc[i].status1 = RXfOwnership_DMA;
-                rx_desc[i].buf = (unsigned int)net_rx_packets[i] | NON_CACHE_ADDR;
+                rx_desc[i].buf = (unsigned char *)net_rx_packets[i];
                 rx_desc[i].status2 = 0;
-                rx_desc[i].next = (unsigned int)(&rx_desc[(i + 1) % TX_DESCRIPTOR_NUM]) | NON_CACHE_ADDR;                                
+                rx_desc[i].next = (struct eth_descriptor *)(&rx_desc[(i + 1) % TX_DESCRIPTOR_NUM]);                                
         }
         
         return;
@@ -219,10 +224,10 @@ int nuc970_eth_recv (struct eth_device *dev)
 
 }
 
-int nuc970_eth_send(struct eth_device *dev, volatile void *packet, int length)
+int nuc970_eth_send(struct eth_device *dev, void *packet, int length)
 {
 
-        tx_desc_ptr->buf = (unsigned char *)((unsigned int) packet | NON_CACHE_ADDR);
+        tx_desc_ptr->buf = (unsigned char *)packet;
         tx_desc_ptr->status2 = (unsigned int)length;
         tx_desc_ptr->status1 |= TXfOwnership_DMA;
 
