@@ -1,5 +1,5 @@
 #!/bin/sh 
-source ./setPath.sh
+. ./setPath.sh
 chmod u+x scripts/*.sh
 make distclean
 make nuc972_rainbow_defconfig
