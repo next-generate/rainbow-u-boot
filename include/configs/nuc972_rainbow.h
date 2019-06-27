@@ -247,6 +247,5 @@
 	"uimage2=970image.sha\0" \
 	"bootcmd=fatload mmc 0 0x7fc0 ${uimage1}; bootm 0x7fc0; fatload mmc 0 0x7fc0 ${uimage2}; bootm 0x7fc0\0" \
 
-#endif
 
 #endif
