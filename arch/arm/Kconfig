@@ -203,6 +203,7 @@ config TARGET_NUC970_ETH2UART
 config TARGET_NUC972_RAINBOW
 	bool "Support xbrother nuc972 rainbow"
 	select CPU_ARM926EJS
+	select SUPPORT_SPL
 	
 config TARGET_NUC980
 	bool "Support NUC980"
