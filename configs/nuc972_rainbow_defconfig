@@ -160,7 +160,6 @@ CONFIG_TARGET_NUC972_RAINBOW=y
 CONFIG_SPL_GPIO_SUPPORT=y
 # CONFIG_SPL_LIBCOMMON_SUPPORT is not set
 # CONFIG_SPL_LIBGENERIC_SUPPORT is not set
-CONFIG_SYS_MALLOC_F_LEN=0x400
 # CONFIG_SPL_EXT_SUPPORT is not set
 # CONFIG_SPL_FAT_SUPPORT is not set
 # CONFIG_SPL_I2C_SUPPORT is not set
@@ -186,8 +185,6 @@ CONFIG_IDENT_STRING=""
 # ARM debug
 #
 # CONFIG_DEBUG_LL is not set
-CONFIG_SMBIOS_PRODUCT_NAME="hikey"
-# CONFIG_AHCI is not set
 
 #
 # General setup
@@ -206,9 +203,6 @@ CONFIG_SYS_MALLOC_CLEAR_ON_INIT=y
 # Boot images
 #
 # CONFIG_FIT is not set
-# CONFIG_OF_BOARD_SETUP is not set
-# CONFIG_OF_SYSTEM_SETUP is not set
-# CONFIG_OF_STDOUT_VIA_ALIAS is not set
 CONFIG_SYS_EXTRA_OPTIONS=""
 # CONFIG_SPL_DFU_SUPPORT is not set
 CONFIG_ARCH_FIXUP_FDT=y
@@ -310,9 +304,7 @@ CONFIG_CMD_CONSOLE=y
 CONFIG_CMD_BOOTD=y
 CONFIG_CMD_BOOTM=y
 # CONFIG_CMD_BOOTZ is not set
-CONFIG_CMD_BOOTEFI=y
 CONFIG_CMD_ELF=y
-CONFIG_CMD_FDT=y
 CONFIG_CMD_GO=y
 CONFIG_CMD_RUN=y
 CONFIG_CMD_IMI=y
@@ -352,7 +344,7 @@ CONFIG_CMD_NAND=y
 # CONFIG_CMD_SF is not set
 # CONFIG_CMD_SPI is not set
 # CONFIG_CMD_I2C is not set
-# CONFIG_CMD_DATE is not set
+CONFIG_CMD_DATE=y
 CONFIG_CMD_USB=y
 # CONFIG_CMD_DFU is not set
 # CONFIG_CMD_USB_MASS_STORAGE is not set
@@ -437,13 +429,11 @@ CONFIG_BOOTP_VCI_STRING="U-Boot.arm"
 # CONFIG_ADC is not set
 # CONFIG_ADC_EXYNOS is not set
 # CONFIG_ADC_SANDBOX is not set
-# CONFIG_BLK is not set
 # CONFIG_BLOCK_CACHE is not set
 
 #
 # Clock
 #
-# CONFIG_CLK is not set
 # CONFIG_CPU is not set
 
 #
@@ -454,7 +444,6 @@ CONFIG_BOOTP_VCI_STRING="U-Boot.arm"
 #
 # Demo for driver model
 #
-# CONFIG_DM_DEMO is not set
 
 #
 # DFU support
@@ -463,7 +452,6 @@ CONFIG_BOOTP_VCI_STRING="U-Boot.arm"
 #
 # DMA Support
 #
-# CONFIG_DMA is not set
 # CONFIG_TI_EDMA3 is not set
 
 #
@@ -480,16 +468,13 @@ CONFIG_NUC970_GPIO=y
 # I2C support
 #
 # CONFIG_DM_I2C is not set
-# CONFIG_DM_I2C_COMPAT is not set
 # CONFIG_SYS_I2C_DW is not set
 # CONFIG_NUC970_I2C is not set
-# CONFIG_DM_KEYBOARD is not set
 # CONFIG_CROS_EC_KEYB is not set
 
 #
 # LED Support
 #
-# CONFIG_LED is not set
 
 #
 # Mailbox Controller Support
@@ -502,25 +487,21 @@ CONFIG_NUC970_GPIO=y
 #
 # Multifunction device drivers
 #
-# CONFIG_MISC is not set
 # CONFIG_CROS_EC is not set
 # CONFIG_FSL_SEC_MON is not set
 # CONFIG_MXC_OCOTP is not set
 # CONFIG_NUVOTON_NCT6102D is not set
-# CONFIG_PWRSEQ is not set
 # CONFIG_PCA9551_LED is not set
 # CONFIG_WINBOND_W83627 is not set
 
 #
 # MMC Host controller Support
 #
-# CONFIG_DM_MMC is not set
 # CONFIG_NUC970_MMC is not set
 
 #
 # MTD Support
 #
-# CONFIG_MTD is not set
 
 #
 # NAND Device Support
@@ -549,7 +530,6 @@ CONFIG_MTD_UBI=y
 CONFIG_MTD_UBI_WL_THRESHOLD=4096
 CONFIG_MTD_UBI_BEB_LIMIT=20
 # CONFIG_MTD_UBI_FASTMAP is not set
-# CONFIG_DM_ETH is not set
 # CONFIG_PHYLIB is not set
 CONFIG_NETDEVICES=y
 # CONFIG_E1000 is not set
@@ -567,7 +547,6 @@ CONFIG_NUC970_PHY_ADDR=1
 #
 # Pin controllers
 #
-# CONFIG_PINCTRL is not set
 
 #
 # Power
@@ -576,10 +555,6 @@ CONFIG_NUC970_PHY_ADDR=1
 #
 # Power Domain Support
 #
-# CONFIG_DM_PMIC is not set
-# CONFIG_DM_REGULATOR is not set
-# CONFIG_DM_PWM is not set
-# CONFIG_RAM is not set
 
 #
 # Remote Processor drivers
@@ -592,13 +567,11 @@ CONFIG_NUC970_PHY_ADDR=1
 #
 # Real Time Clock
 #
-# CONFIG_DM_RTC is not set
 CONFIG_RTC_NUC970=y
 
 #
 # Serial drivers
 #
-# CONFIG_DM_SERIAL is not set
 # CONFIG_DEBUG_UART is not set
 # CONFIG_DEBUG_UART_SKIP_INIT is not set
 # CONFIG_ATMEL_USART is not set
@@ -615,7 +588,6 @@ CONFIG_NUC970_CONSOLE=y
 #
 # SPI Support
 #
-# CONFIG_DM_SPI is not set
 # CONFIG_FSL_ESPI is not set
 # CONFIG_FSL_QSPI is not set
 # CONFIG_TI_QSPI is not set
@@ -625,24 +597,20 @@ CONFIG_NUC970_CONSOLE=y
 #
 # SPMI support
 #
-# CONFIG_SPMI is not set
 
 #
 # System reset device drivers
 #
-# CONFIG_SYSRESET is not set
 # CONFIG_DM_THERMAL is not set
 
 #
 # Timer Support
 #
-# CONFIG_TIMER is not set
 
 #
 # TPM support
 #
 CONFIG_USB=y
-# CONFIG_DM_USB is not set
 
 #
 # USB Host Controller Drivers
@@ -675,7 +643,6 @@ CONFIG_USB_STORAGE=y
 #
 # Graphics support
 #
-# CONFIG_DM_VIDEO is not set
 
 #
 # TrueType Fonts
@@ -684,8 +651,6 @@ CONFIG_USB_STORAGE=y
 # CONFIG_VIDEO_LCD_ANX9804 is not set
 # CONFIG_VIDEO_LCD_SSD2828 is not set
 # CONFIG_VIDEO_MVEBU is not set
-# CONFIG_DISPLAY is not set
-# CONFIG_VIDEO_BRIDGE is not set
 # CONFIG_LCD is not set
 CONFIG_NUC970_WATCHDOG=y
 # CONFIG_PHYS_TO_BUS is not set
@@ -712,7 +677,6 @@ CONFIG_REGEX=y
 # CONFIG_LIB_RAND is not set
 # CONFIG_CMD_DHRYSTONE is not set
 # CONFIG_RSA is not set
-# CONFIG_TPM is not set
 
 #
 # Hashing Support
