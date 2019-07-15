@@ -243,7 +243,7 @@
 #define CONFIG_STACKSIZE	(32*1024)	/* regular stack */
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"ethaddr=12:34:56:78:99:aa" \
+	"ethaddr=12:34:56:78:99:aa\0" \
 	"ipaddr=192.168.1.123\0" \
 	"serverip=192.168.1.120\0" \
 	"gatewayip=192.168.1.1\0" \
