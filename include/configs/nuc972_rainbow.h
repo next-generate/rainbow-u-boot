@@ -243,9 +243,13 @@
 #define CONFIG_STACKSIZE	(32*1024)	/* regular stack */
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"uimage1=selftest.sha\0" \
-	"uimage2=970image.sha\0" \
-	"bootcmd=fatload mmc 0 0x7fc0 ${uimage1}; bootm 0x7fc0; fatload mmc 0 0x7fc0 ${uimage2}; bootm 0x7fc0\0" \
+	"ethaddr=12:34:56:78:99:aa" \
+	"ipaddr=192.168.1.123\0" \
+	"serverip=192.168.1.120\0" \
+	"gatewayip=192.168.1.1\0" \
+	"watchdog=off\0" \
+	"bootargs=console=ttyS0,115200n8 root=/dev/mtdblock2 rootfstype=yaffs2 rootflags=inband-tags mtdparts=nand0:2M(u-boot),20M(Kernel),-(user)\0" \
+	"bootcmd=nboot 0x7fc0 0 0x200000;bootm 0x7fc0\0" \
 
 
 #endif
