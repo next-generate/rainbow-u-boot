@@ -639,13 +639,14 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 				printf("Unknown nand command suffix '%s'.\n", s);
 				return 1;
 			}
-			nand->rw_oob = 1;
-			nand->skipfirstblk = 1;
-			ret = nand_write_skip_bad(nand, off, &rwsize,
+			mtd->rw_oob = 1;
+			mtd->skipfirstblk = 1;
+#define WITH_YAFFS_OOB	(1 << 0) /* whether write with yaffs format. This flag*/
+			ret = nand_write_skip_bad(mtd, off, &rwsize,
 						(u_char *)addr,
 						WITH_YAFFS_OOB);
-			nand->rw_oob = 0;
-			nand->skipfirstblk = 0;
+			mtd->rw_oob = 0;
+			mtd->skipfirstblk = 0;
 #endif
 		} else if (!strcmp(s, ".oob")) {
 			/* out-of-band data */
