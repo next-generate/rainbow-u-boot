@@ -126,8 +126,8 @@
 #define CONFIG_SYS_NAND_ONFI_DETECTION 1
 
 #define MTDIDS_DEFAULT "nand0=nand0"
-#define MTDPARTS_DEFAULT "mtdparts=nand0:0x200000@0x0(u-boot),0x1400000@0x200000(kernel),-(user)"
-#define MTD_ACTIVE_PART "nand0,2"
+#define MTDPARTS_DEFAULT "mtdparts=nand0:0x200000@0x0(u-boot),0x400000@0x200000(kernel-master),0x3200000@0x600000(rootfs),0x3200000@0x3800000(app),-(data)"
+#define MTD_ACTIVE_PART "nand0,4"
 
 /*#define CONFIG_CMD_NAND_YAFFS2 1 */
 /*#define CONFIG_YAFFS2          1 */
@@ -245,11 +245,11 @@
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"bootdelay=0\0" \
 	"ethaddr=12:34:56:78:99:aa\0" \
-	"ipaddr=192.168.1.123\0" \
-	"serverip=192.168.1.120\0" \
-	"gatewayip=192.168.1.1\0" \
+	"ipaddr=192.168.6.55\0" \
+	"serverip=192.168.6.120\0" \
+	"gatewayip=192.168.6.1\0" \
 	"watchdog=off\0" \
-	"bootargs=console=ttyS0,115200n8 root=/dev/mtdblock2 rootfstype=yaffs2 rootflags=inband-tags mtdparts=nand0:2M(u-boot),20M(Kernel),-(user)\0" \
+	"bootargs=console=ttyS0,115200n8 root=/dev/mtdblock2 rootfstype=yaffs2 rootflags=inband-tags mtdparts=nand0:2M(u-boot),4M(Kernel),32M(rootfs),32M(app),-(data)\0" \
 	"bootcmd=nboot 0x7fc0 0 0x200000;bootm 0x7fc0\0" \
 
 
