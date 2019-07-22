@@ -126,8 +126,8 @@
 #define CONFIG_SYS_NAND_ONFI_DETECTION 1
 
 #define MTDIDS_DEFAULT "nand0=nand0"
-#define MTDPARTS_DEFAULT "mtdparts=nand0:0x200000@0x0(u-boot),0x400000@0x200000(kernel-master),0x3200000@0x600000(rootfs),0x3200000@0x3800000(app),-(data)"
-#define MTD_ACTIVE_PART "nand0,4"
+#define MTDPARTS_DEFAULT "mtdparts=nand0:0x80000@0x0(u-boot-master),0x80000@0x80000(env-master),0x80000@0x100000(u-boot-backup),0x80000@0x180000(env-backup),0x400000@0x200000(kernel-master),0x3200000@0x600000(rootfs),0x3200000@0x3800000(app),-(data)"
+#define MTD_ACTIVE_PART "nand0,7"
 
 /*#define CONFIG_CMD_NAND_YAFFS2 1 */
 /*#define CONFIG_YAFFS2          1 */
@@ -214,7 +214,7 @@
 #ifdef CONFIG_ENV_IS_IN_MMC
 #define CONFIG_SYS_MMC_ENV_DEV  1
 #define CONFIG_ENV_OFFSET       0x80000
-#define CONFIG_ENV_SIZE         /*2048*/0x10000
+#define CONFIG_ENV_SIZE         /*2048*/0x80000
 #define CONFIG_ENV_SECT_SIZE    512
 #define CONFIG_ENV_OVERWRITE
 #endif
