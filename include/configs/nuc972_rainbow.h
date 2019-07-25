@@ -136,7 +136,7 @@
 #define CONFIG_SYS_NAND_ECCBYTES        12
 #ifdef CONFIG_ENV_IS_IN_NAND
 #define CONFIG_ENV_OFFSET       0x80000
-#define CONFIG_ENV_SIZE         0x10000
+#define CONFIG_ENV_SIZE         0x80000
 #define CONFIG_ENV_SECT_SIZE    0x20000
 #define CONFIG_ENV_RANGE	        (4 * CONFIG_ENV_SECT_SIZE)  /* Env range : 0x80000 ~ 0x100000 */
 #define CONFIG_ENV_OVERWRITE
@@ -245,6 +245,7 @@
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"bootdelay=0\0" \
 	"ethaddr=12:34:56:78:99:aa\0" \
+	"ethaddr1=12:34:56:78:99:ab\0" \
 	"ipaddr=192.168.6.55\0" \
 	"serverip=192.168.6.120\0" \
 	"gatewayip=192.168.6.1\0" \
