@@ -126,7 +126,7 @@
 #define CONFIG_SYS_NAND_ONFI_DETECTION 1
 
 #define MTDIDS_DEFAULT "nand0=nand0"
-#define MTDPARTS_DEFAULT "mtdparts=nand0:0x80000@0x0(u-boot-master),0x80000@0x80000(env-master),0x80000@0x100000(u-boot-backup),0x80000@0x180000(env-backup),0x400000@0x200000(kernel-master),0x3200000@0x600000(rootfs),0x3200000@0x3800000(app),-(data)"
+#define MTDPARTS_DEFAULT "mtdparts=nand0:0x80000@0x0(u-boot-master),0x80000@0x80000(env-master),0x80000@0x100000(u-boot-backup),0x80000@0x180000(env-backup),0x400000@0x200000(kernel-master),0x1000000@0x600000(rootfs),0x4000000@0x3800000(app),-(data)"
 #define MTD_ACTIVE_PART "nand0,7"
 
 /*#define CONFIG_CMD_NAND_YAFFS2 1 */
@@ -136,7 +136,7 @@
 #define CONFIG_SYS_NAND_ECCBYTES        12
 #ifdef CONFIG_ENV_IS_IN_NAND
 #define CONFIG_ENV_OFFSET       0x80000
-#define CONFIG_ENV_SIZE         0x10000
+#define CONFIG_ENV_SIZE         0x80000
 #define CONFIG_ENV_SECT_SIZE    0x20000
 #define CONFIG_ENV_RANGE	        (4 * CONFIG_ENV_SECT_SIZE)  /* Env range : 0x80000 ~ 0x100000 */
 #define CONFIG_ENV_OVERWRITE
@@ -245,11 +245,12 @@
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"bootdelay=0\0" \
 	"ethaddr=12:34:56:78:99:aa\0" \
+	"ethaddr1=12:34:56:78:99:ab\0" \
 	"ipaddr=192.168.6.55\0" \
 	"serverip=192.168.6.120\0" \
 	"gatewayip=192.168.6.1\0" \
 	"watchdog=off\0" \
-	"bootargs=console=ttyS0,115200n8 root=/dev/mtdblock2 rootfstype=yaffs2 rootflags=inband-tags mtdparts=nand0:2M(u-boot),4M(Kernel),32M(rootfs),32M(app),-(data)\0" \
+	"bootargs=console=ttyS0,115200n8 root=/dev/mtdblock5 rootfstype=jffs2 rw noinitrd init=/linuxrc mem=64MB mtdparts=nand0:512k(u-boot-spl),512k(env),512k(u-boot),512k(env-bak),4M(Kernel),16M(rootfs),64M(app),-(data)\0" \
 	"bootcmd=nboot 0x7fc0 0 0x200000;bootm 0x7fc0\0" \
 
 
