@@ -55,7 +55,7 @@
 
 #define CONFIG_HW_WATCHDOG
 
-#define CONFIG_SYS_BOOTM_LEN		0x1000000 /* 16MB max kernel size */
+#define CONFIG_SYS_BOOTM_LEN		0x400000 /* 16MB max kernel size */
 
 /*#define CONFIG_BOOTDELAY	3*/
 
@@ -126,7 +126,7 @@
 #define CONFIG_SYS_NAND_ONFI_DETECTION 1
 
 #define MTDIDS_DEFAULT "nand0=nand0"
-#define MTDPARTS_DEFAULT "mtdparts=nand0:0x80000@0x0(u-boot-master),0x80000@0x80000(env-master),0x80000@0x100000(u-boot-backup),0x80000@0x180000(env-backup),0x400000@0x200000(kernel-master),0x1000000@0x600000(rootfs),0x4000000@0x3800000(app),-(data)"
+#define MTDPARTS_DEFAULT "mtdparts=nand0:0x80000@0x0(u-boot-apl),0x80000@0x80000(env-master),0x80000@0x100000(u-boot-backup),0x80000@0x180000(env-backup),0x400000@0x200000(kernel-master),0x1000000@0x600000(rootfs),0x4000000@0x1600000(app),-(data)"
 #define MTD_ACTIVE_PART "nand0,7"
 
 /*#define CONFIG_CMD_NAND_YAFFS2 1 */
