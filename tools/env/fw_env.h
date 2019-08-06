@@ -59,7 +59,7 @@
 	"gatewayip=192.168.6.1\0" \
 	"watchdog=off\0" \
 	"bootargs=console=ttyS0,115200n8 root=/dev/mtdblock5 rootfstype=jffs2 rw noinitrd init=/linuxrc mem=64MB mtdparts=nand0:512k(u-boot-spl),512k(env),512k(u-boot),512k(env-bak),4M(Kernel),16M(rootfs),64M(app),-(data)\0" \
-	"bootcmd=nboot 0x7fc0 0 0x200000;bootm 0x7fc0\0" \
+	"bootcmd=nboot 0x7fc0 0 0x200000;bootm 0x7fc0\0" 
 #endif
 
 struct env_opts {
