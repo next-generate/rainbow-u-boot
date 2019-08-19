@@ -246,9 +246,9 @@
 	"bootdelay=3\0" \
 	"ethaddr=12:34:56:78:99:aa\0" \
 	"ethaddr1=12:34:56:78:99:ab\0" \
-	"ipaddr=192.168.6.55\0" \
-	"serverip=192.168.6.120\0" \
-	"gatewayip=192.168.6.1\0" \
+	"ipaddr=192.168.5.249\0" \
+	"serverip=192.168.5.120\0" \
+	"gatewayip=192.168.5.1\0" \
 	"watchdog=off\0" \
 	"bootargs=console=ttyS0,115200n8 root=/dev/mtdblock5 rootfstype=jffs2 rw mem=64MB noinitrd init=/linuxrc mtdparts=nand0:2M(u-boot),4M(Kernel),32M(rootfs),32M(app),-(data)\0" \
 	"bootcmd=nboot 0x7fc0 0 0x200000;bootm 0x7fc0\0" \
