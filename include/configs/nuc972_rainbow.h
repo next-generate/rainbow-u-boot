@@ -243,7 +243,7 @@
 #define CONFIG_STACKSIZE	(32*1024)	/* regular stack */
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"bootdelay=0\0" \
+	"bootdelay=3\0" \
 	"ethaddr=12:34:56:78:99:aa\0" \
 	"ethaddr1=12:34:56:78:99:ab\0" \
 	"ipaddr=192.168.6.55\0" \
