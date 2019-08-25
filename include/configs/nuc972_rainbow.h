@@ -136,7 +136,7 @@
 #define CONFIG_SYS_NAND_ECCBYTES        12
 #ifdef CONFIG_ENV_IS_IN_NAND
 #define CONFIG_ENV_OFFSET       0x80000
-#define CONFIG_ENV_SIZE         0x80000
+#define CONFIG_ENV_SIZE         0x10000
 #define CONFIG_ENV_SECT_SIZE    0x20000
 #define CONFIG_ENV_RANGE	        (4 * CONFIG_ENV_SECT_SIZE)  /* Env range : 0x80000 ~ 0x100000 */
 #define CONFIG_ENV_OVERWRITE
@@ -214,7 +214,7 @@
 #ifdef CONFIG_ENV_IS_IN_MMC
 #define CONFIG_SYS_MMC_ENV_DEV  1
 #define CONFIG_ENV_OFFSET       0x80000
-#define CONFIG_ENV_SIZE         /*2048*/0x80000
+#define CONFIG_ENV_SIZE         0x10000
 #define CONFIG_ENV_SECT_SIZE    512
 #define CONFIG_ENV_OVERWRITE
 #endif
